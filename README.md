@@ -1,4 +1,4 @@
-# Hitler Secret Bot
+# Secret Hitler Bot
 
 Бот для Telegram, который распределяет роли и партии игрокам.
 
