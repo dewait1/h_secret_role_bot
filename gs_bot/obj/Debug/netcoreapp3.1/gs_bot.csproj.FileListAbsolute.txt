@@ -1,0 +1,16 @@
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\gs_bot.exe
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.csprojAssemblyReference.cache
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.AssemblyInfoInputs.cache
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.AssemblyInfo.cs
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\gs_bot.deps.json
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\gs_bot.runtimeconfig.json
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\gs_bot.runtimeconfig.dev.json
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\gs_bot.dll
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\gs_bot.pdb
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\Newtonsoft.Json.dll
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\bin\Debug\netcoreapp3.1\Telegram.Bot.dll
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.csproj.CoreCompileInputs.cache
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.csproj.CopyComplete
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.dll
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.pdb
+C:\Users\Artem Samokhval\source\repos\gs_bot\gs_bot\obj\Debug\netcoreapp3.1\gs_bot.genruntimeconfig.cache
