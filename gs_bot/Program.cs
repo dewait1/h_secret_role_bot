@@ -13,14 +13,13 @@ namespace gs_bot
 {
     class Program
     {
-        private static TelegramBotClient botClient = new TelegramBotClient("1298287310:AAH6XHnYtLRV8wLhI7F3VN5XIveH9s80t1k");
+        private static TelegramBotClient botClient = new TelegramBotClient("<bot_token>");
         private static int seconds = 20;
         private static Timer aTimer;
         private static List<Player> players = new List<Player>();
         private static Message messageWithTime;
         private static string globalParty;
         private static bool partyIsChecked = false;
-        private static bool gameIsStarted = false;
 
         static void Main(string[] args)
         {
@@ -59,7 +58,7 @@ namespace gs_bot
             }
             catch
             {
-                botClient.SendTextMessageAsync(319872328, "Ошибка в методе BotOnCallbackQueryRecieved");
+                botClient.SendTextMessageAsync(<id>, "Ошибка в методе BotOnCallbackQueryRecieved");
             }              
         }
 
@@ -68,24 +67,19 @@ namespace gs_bot
             try
             {
                 var chatId = messageEventArgs.Message.Chat.Id;
-                if (messageEventArgs.Message.Text == "/newgame" && gameIsStarted == false)
+                if (messageEventArgs.Message.Text == "/newgame")
                 {
-                    gameIsStarted = true;
                     players.Clear();
                     globalParty = "";
                     partyIsChecked = false;
                     var inlineKeyboard = new InlineKeyboardMarkup(new[]
                     {
-                        InlineKeyboardButton.WithCallbackData("Играть")
-                    });
+                    InlineKeyboardButton.WithCallbackData("Играть")
+                });
                     botClient.OnCallbackQuery += BotOnCallbackQueryRecieved;
                     await botClient.SendTextMessageAsync(chatId, "Для участия в игре нажми кнопку 'Играть'", replyMarkup: inlineKeyboard);
                     SetTimer();
                     messageWithTime = await botClient.SendTextMessageAsync(chatId, "Oсталось времени: 20").ConfigureAwait(false);
-                }
-                else if (messageEventArgs.Message.Text == "/newgame" && gameIsStarted == true)
-                {
-                    await botClient.SendTextMessageAsync(chatId, "Игра уже начата!").ConfigureAwait(false);
                 }
                 if (messageEventArgs.Message.Text == "/start")
                 {
@@ -136,7 +130,7 @@ namespace gs_bot
             }
             catch
             {
-                await botClient.SendTextMessageAsync(319872328, "Ошибка обработки сообщения");
+                await botClient.SendTextMessageAsync(<id>, "Ошибка обработки сообщения");
             }           
         }
 
@@ -158,7 +152,7 @@ namespace gs_bot
             }
             catch
             {
-                await botClient.SendTextMessageAsync(319872328, "Требуется номер игрока");
+                await botClient.SendTextMessageAsync(<id>, "Требуется номер игрока");
             }          
         }
 
@@ -174,7 +168,7 @@ namespace gs_bot
             }
             catch
             {
-                botClient.SendTextMessageAsync(319872328, "Ошибка таймера");
+                botClient.SendTextMessageAsync(<id>, "Ошибка таймера");
             }
         }
 
@@ -201,12 +195,11 @@ namespace gs_bot
                     await botClient.EditMessageTextAsync(chatId, messageWithTime.MessageId, "Роли распределены, приятной игры!");
                     aTimer.Stop();
                     aTimer.Dispose();
-                    gameIsStarted = false;
                 }
             }
             catch
             {
-                await botClient.SendTextMessageAsync(319872328, "Ошибка метода OnTimedEvent");
+                await botClient.SendTextMessageAsync(<id>, "Ошибка метода OnTimedEvent");
             }
             
         }
@@ -215,11 +208,12 @@ namespace gs_bot
         {
             try
             {
-                players.Add(new Player() { firstName = "Vasya", lastName = "Gniloy", id = players[0].id });
-                players.Add(new Player() { firstName = "Lesha", lastName = "Pidor", id = players[0].id });
-                players.Add(new Player() { firstName = "Petya", lastName = "Petya", id = players[0].id });
-                players.Add(new Player() { firstName = "Sasha", lastName = "Sasha", id = players[0].id });
-                players.Add(new Player() { firstName = "Sasha", lastName = "Sasha", id = players[0].id });
+                //Добавление данных для тестирования
+                //players.Add(new Player() { firstName = "Vasya", lastName = "Gniloy", id = players[0].id });
+                //players.Add(new Player() { firstName = "Lesha", lastName = "Pidor", id = players[0].id });
+                //players.Add(new Player() { firstName = "Petya", lastName = "Petya", id = players[0].id });
+                //players.Add(new Player() { firstName = "Sasha", lastName = "Sasha", id = players[0].id });
+                //players.Add(new Player() { firstName = "Sasha", lastName = "Sasha", id = players[0].id });
                 int playersCount = players.Count;
                 switch (playersCount)
                 {
@@ -255,7 +249,7 @@ namespace gs_bot
             }
             catch
             {
-                botClient.SendTextMessageAsync(319872328, "Ошибка метода SendRolesAndParties");
+                botClient.SendTextMessageAsync(<id>, "Ошибка метода SendRolesAndParties");
             }
             
         }
@@ -284,7 +278,7 @@ namespace gs_bot
             }
             catch
             {
-                await botClient.SendTextMessageAsync(319872328, "Ошибка метода SetRole, во время распределения ролей");
+                await botClient.SendTextMessageAsync(<id>, "Ошибка метода SetRole, во время распределения ролей");
             }           
         }
     }
