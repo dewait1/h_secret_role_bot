@@ -13,7 +13,7 @@ namespace gs_bot
 {
     class Program
     {
-        private static TelegramBotClient botClient = new TelegramBotClient("<bot_token>");
+        private static TelegramBotClient botClient = new TelegramBotClient("1298287310:AAH6XHnYtLRV8wLhI7F3VN5XIveH9s80t1k");
         private static int seconds = 20;
         private static Timer aTimer;
         private static List<Player> players = new List<Player>();
@@ -58,7 +58,7 @@ namespace gs_bot
             }
             catch
             {
-                botClient.SendTextMessageAsync(<id>, "Ошибка в методе BotOnCallbackQueryRecieved");
+                botClient.SendTextMessageAsync(319872328, "Ошибка в методе BotOnCallbackQueryRecieved");
             }              
         }
 
@@ -130,7 +130,7 @@ namespace gs_bot
             }
             catch
             {
-                await botClient.SendTextMessageAsync(<id>, "Ошибка обработки сообщения");
+                await botClient.SendTextMessageAsync(319872328, "Ошибка обработки сообщения");
             }           
         }
 
@@ -152,7 +152,7 @@ namespace gs_bot
             }
             catch
             {
-                await botClient.SendTextMessageAsync(<id>, "Требуется номер игрока");
+                await botClient.SendTextMessageAsync(319872328, "Требуется номер игрока");
             }          
         }
 
@@ -168,7 +168,7 @@ namespace gs_bot
             }
             catch
             {
-                botClient.SendTextMessageAsync(<id>, "Ошибка таймера");
+                botClient.SendTextMessageAsync(319872328, "Ошибка таймера");
             }
         }
 
@@ -199,7 +199,7 @@ namespace gs_bot
             }
             catch
             {
-                await botClient.SendTextMessageAsync(<id>, "Ошибка метода OnTimedEvent");
+                await botClient.SendTextMessageAsync(319872328, "Ошибка метода OnTimedEvent");
             }
             
         }
@@ -249,7 +249,7 @@ namespace gs_bot
             }
             catch
             {
-                botClient.SendTextMessageAsync(<id>, "Ошибка метода SendRolesAndParties");
+                botClient.SendTextMessageAsync(319872328, "Ошибка метода SendRolesAndParties");
             }
             
         }
@@ -278,7 +278,7 @@ namespace gs_bot
             }
             catch
             {
-                await botClient.SendTextMessageAsync(<id>, "Ошибка метода SetRole, во время распределения ролей");
+                await botClient.SendTextMessageAsync(319872328, "Ошибка метода SetRole, во время распределения ролей");
             }           
         }
     }
