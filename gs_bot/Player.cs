@@ -6,10 +6,23 @@ namespace gs_bot
 {
     class Player
     {
-        public string firstName { get; set; }
-        public string lastName { get; set; }
-        public int id { get; set; }
-        public string party { get; set; }
-        public string role { get; set; }
+        public string FirstName { get; }
+
+        public string LastName { get; }
+
+        public int Id { get; set; }
+
+        public string Party { get; set; }
+
+        public string Role { get; set; }
+
+        public Player(string firstName, string lastName, int id)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+            Id = id;
+            Party = null;
+            Role = null;
+        }
     }
 }

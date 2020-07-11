@@ -6,24 +6,24 @@ using System.Timers;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace gs_bot
 {
     class Program
     {
-        private static TelegramBotClient botClient = new TelegramBotClient("1298287310:AAH6XHnYtLRV8wLhI7F3VN5XIveH9s80t1k");
+        private static TelegramBotClient botClient = new TelegramBotClient(Data.BotId);
         private static int seconds = 20;
         private static Timer aTimer;
         private static List<Player> players = new List<Player>();
         private static Message messageWithTime;
-        private static string globalParty;
-        private static bool partyIsChecked = false;
+        private static string partyToShow;
+        private static int partyCanBeChecked;
+        private static bool gameIsStarted;
 
         static void Main(string[] args)
         {
-            Console.WriteLine("bot started");
+            Console.WriteLine("Bot started");
             botClient.OnMessage += HandleMessage;
             botClient.StartReceiving();
             Console.ReadLine();
@@ -34,31 +34,21 @@ namespace gs_bot
             try
             {
                 bool shouldAdd = true;
+
                 if (players.Count > 0)
                 {
-                    foreach (var player in players)
-                    {
-                        if (player.id == e.CallbackQuery.From.Id)
-                        {
-                            shouldAdd = false;
-                        }
-                    }
+                    shouldAdd = !players.All(p => p.Id == e.CallbackQuery.From.Id);                                      
                 }
+
                 if (shouldAdd)
                 {
-                    players.Add(new Player
-                    {
-                        id = e.CallbackQuery.From.Id,
-                        firstName = e.CallbackQuery.From.FirstName,
-                        lastName = e.CallbackQuery.From.LastName,
-                        party = null,
-                        role = null
-                    });
+                    players.Add(new Player(e.CallbackQuery.From.FirstName, e.CallbackQuery.From.LastName, e.CallbackQuery.From.Id));
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                botClient.SendTextMessageAsync(319872328, "Ошибка в методе BotOnCallbackQueryRecieved");
+                botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Произошла ошибка (см. лог)");
+                Console.WriteLine("Error in BotOnCallbackQueryRecieved(): " + ex.Message);
             }              
         }
 
@@ -67,19 +57,23 @@ namespace gs_bot
             try
             {
                 var chatId = messageEventArgs.Message.Chat.Id;
-                if (messageEventArgs.Message.Text == "/newgame")
+                if (messageEventArgs.Message.Text == "/newgame" && gameIsStarted == false)
                 {
+                    gameIsStarted = true;
                     players.Clear();
-                    globalParty = "";
-                    partyIsChecked = false;
+                    partyToShow = null;
                     var inlineKeyboard = new InlineKeyboardMarkup(new[]
                     {
-                    InlineKeyboardButton.WithCallbackData("Играть")
-                });
+                        InlineKeyboardButton.WithCallbackData("Играть")
+                    });
                     botClient.OnCallbackQuery += BotOnCallbackQueryRecieved;
                     await botClient.SendTextMessageAsync(chatId, "Для участия в игре нажми кнопку 'Играть'", replyMarkup: inlineKeyboard);
                     SetTimer();
                     messageWithTime = await botClient.SendTextMessageAsync(chatId, "Oсталось времени: 20").ConfigureAwait(false);
+                }
+                else if (gameIsStarted == true)
+                {
+                    await botClient.SendTextMessageAsync(chatId, "А ничо шо игра блять уже началась?").ConfigureAwait(false);
                 }
                 if (messageEventArgs.Message.Text == "/start")
                 {
@@ -87,37 +81,48 @@ namespace gs_bot
                 }
                 if (messageEventArgs.Message.Text == "/show")
                 {
-                    if (!partyIsChecked)
-                    {
+                    if (partyCanBeChecked > 0)
+                    {                       
                         if (players.Count == 0)
                         {
                             await botClient.SendTextMessageAsync(chatId, "Ну и шо ты собрался показывать, дурачок?");
                         }
                         else
                         {
-                            int id = players.FindIndex(a => a.id == messageEventArgs.Message.From.Id);
-                            globalParty = players[id].party;
-                            players.RemoveAt(id);
+                            players[1].Id = 1;
+                            players[2].Id = 1;
+                            players[3].Id = 1;
+                            players[4].Id = 1;
+                            players[5].Id = 1;
+
                             var markup = new ReplyKeyboardMarkup();
                             var rows = new List<KeyboardButton[]>();
                             var cols = new List<KeyboardButton>();
                             StringBuilder sb = new StringBuilder();
-                            int i = 1;
-                            foreach (var player in players)
+
+                            partyToShow = players[players.FindIndex(a => a.Id == messageEventArgs.Message.From.Id)].Party;
+
+                            var playersToShow = from p 
+                                                in players 
+                                                where p.Id != messageEventArgs.Message.From.Id 
+                                                select new { p.FirstName, p.LastName, p.Party };
+                                                    
+                            int index = 1;
+                            foreach (var player in playersToShow)
                             {
-                                sb.AppendLine(i + ". " + player.firstName + " " + player.lastName);
-                                i++;
-                            }
-                            for (var index = 1; index < players.Count + 1; index++)
-                            {
+                                sb.AppendLine($"{index}. {player.FirstName} {player.LastName}");
                                 cols.Add(new KeyboardButton(index.ToString()));
                                 rows.Add(cols.ToArray());
                                 cols = new List<KeyboardButton>();
+                                index++;                                
                             }
+
                             markup.Keyboard = rows.ToArray();
                             markup.ResizeKeyboard = true;
                             markup.OneTimeKeyboard = true;
+
                             await botClient.SendTextMessageAsync(chatId, "Кому ты хочешь показать свою партию?\n" + sb, replyMarkup: markup);
+
                             botClient.OnUpdate += BotClient_OnUpdate;
                             botClient.OnMessage -= HandleMessage;
                         }
@@ -128,9 +133,10 @@ namespace gs_bot
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                await botClient.SendTextMessageAsync(319872328, "Ошибка обработки сообщения");
+                await botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Произошла ошибка (см. лог)");
+                Console.WriteLine("Error in HandleMessage(): " + ex.Message);
             }           
         }
 
@@ -143,16 +149,20 @@ namespace gs_bot
                 {
                     var text = message.Text;
                     int id = Int32.Parse(text);
-                    await botClient.SendTextMessageAsync(players[id - 1].id, "Патрия игрока " + message.From.FirstName + " " + message.From.LastName + ": " + globalParty);
+
+                    await botClient.SendTextMessageAsync(players[id - 1].Id, $"Патрия игрока {message.From.FirstName} {message.From.LastName}: {partyToShow}");
                     await botClient.SendTextMessageAsync(message.From.Id, "Сделано");
+
                     botClient.OnUpdate -= BotClient_OnUpdate;
                     botClient.OnMessage += HandleMessage;
-                    partyIsChecked = true;
+
+                    partyCanBeChecked--;
                 }               
             }
-            catch
+            catch (Exception ex)
             {
-                await botClient.SendTextMessageAsync(319872328, "Требуется номер игрока");
+                await botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Требуется номер игрока.");
+                Console.WriteLine("Error in BotClient_OnUpdate(): " + ex.Message);
             }          
         }
 
@@ -166,9 +176,10 @@ namespace gs_bot
                 aTimer.AutoReset = true;
                 aTimer.Enabled = true;
             }
-            catch
+            catch (Exception ex)
             {
-                botClient.SendTextMessageAsync(319872328, "Ошибка таймера");
+                botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Произошла ошибка (см. лог)");
+                Console.WriteLine("Error in SetTimer(): " + ex.Message);
             }
         }
 
@@ -180,26 +191,35 @@ namespace gs_bot
                 if (seconds > 1)
                 {
                     seconds--;
+
                     if (seconds % 5 == 0)
                     {
                         await botClient.EditMessageTextAsync(chatId, messageWithTime.MessageId, "Oсталось времени: " + seconds);
                     }
-                    Console.WriteLine("Осталось " + seconds + " секунд");
+
+                    Console.WriteLine($"Осталось {seconds} секунд");
                     return;
                 }
                 else
                 {
                     seconds = 20;
+
                     SendRolesAndParties();
+
                     botClient.OnCallbackQuery -= BotOnCallbackQueryRecieved;
+
                     await botClient.EditMessageTextAsync(chatId, messageWithTime.MessageId, "Роли распределены, приятной игры!");
+             
                     aTimer.Stop();
                     aTimer.Dispose();
+
+                    gameIsStarted = false;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                await botClient.SendTextMessageAsync(319872328, "Ошибка метода OnTimedEvent");
+                await botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Произошла ошибка (см. лог)");
+                Console.WriteLine("Error in OnTimedEvent: " + ex.Message);
             }
             
         }
@@ -209,52 +229,56 @@ namespace gs_bot
             try
             {
                 //Добавление данных для тестирования
-                //players.Add(new Player() { firstName = "Vasya", lastName = "Gniloy", id = players[0].id });
-                //players.Add(new Player() { firstName = "Lesha", lastName = "Pidor", id = players[0].id });
-                //players.Add(new Player() { firstName = "Petya", lastName = "Petya", id = players[0].id });
-                //players.Add(new Player() { firstName = "Sasha", lastName = "Sasha", id = players[0].id });
-                //players.Add(new Player() { firstName = "Sasha", lastName = "Sasha", id = players[0].id });
-                int playersCount = players.Count;
-                switch (playersCount)
+                players.Add(new Player("Vasya", "Gniloy", players[0].Id));
+                players.Add(new Player("Lesha", "Pidor", players[0].Id));
+                players.Add(new Player("Petya", "Petya", players[0].Id));
+                players.Add(new Player("Sasha", "Sasha", players[0].Id));
+                players.Add(new Player("Lil", "Lil", players[0].Id));
+
+                List<string> partyList = new List<string>();
+
+                switch (players.Count)
                 {
                     case 5:
-                        List<string> partyList = new List<string> { "Либерал", "Либерал", "Либерал", "Фашист", "Фашист" };
-                        SetRole(playersCount, partyList);
+                        partyList.AddRange(AddPartiesRange(3, 2));
+                        partyCanBeChecked = 1;
                         break;
                     case 6:
-                        List<string> partyList1 = new List<string> { "Либерал", "Либерал", "Либерал", "Либерал", "Фашист", "Фашист" };
-                        SetRole(playersCount, partyList1);
+                        partyList.AddRange(AddPartiesRange(4, 2));
+                        partyCanBeChecked = 1;
                         break;
                     case 7:
-                        List<string> partyList2 = new List<string> { "Либерал", "Либерал", "Либерал", "Либерал", "Фашист", "Фашист", "Фашист" };
-                        SetRole(playersCount, partyList2);
+                        partyList.AddRange(AddPartiesRange(4, 3));
+                        partyCanBeChecked = 1;
                         break;
                     case 8:
-                        List<string> partyList3 = new List<string> { "Либерал", "Либерал", "Либерал", "Либерал", "Либерал", "Фашист", "Фашист", "Фашист" };
-                        SetRole(playersCount, partyList3);
+                        partyList.AddRange(AddPartiesRange(5, 3));
+                        partyCanBeChecked = 1;
                         break;
                     case 9:
-                        List<string> partyList4 = new List<string> { "Либерал", "Либерал", "Либерал", "Либерал", "Либерал", "Фашист", "Фашист", "Фашист", "Фашист" };
-                        SetRole(playersCount, partyList4);
+                        partyList.AddRange(AddPartiesRange(5, 4));
+                        partyCanBeChecked = 2;
                         break;
                     case 10:
-                        List<string> partyList5 = new List<string> { "Либерал", "Либерал", "Либерал", "Либерал", "Либерал", "Либерал", "Фашист", "Фашист", "Фашист", "Фашист" };
-                        SetRole(playersCount, partyList5);
+                        partyList.AddRange(AddPartiesRange(6, 4));
+                        partyCanBeChecked = 2;
                         break;
                     default:
-                        var chatId = messageWithTime.Chat.Id;
-                        botClient.SendTextMessageAsync(chatId, "Слишком мало/много игроков :(");
+                        botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Слишком мало/много игроков :(");
                         break;
                 }
+
+                SetRole(players.Count, partyList);
             }
-            catch
+            catch (Exception ex)
             {
-                botClient.SendTextMessageAsync(319872328, "Ошибка метода SendRolesAndParties");
+                botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Произошла ошибка (см. лог)");
+                Console.WriteLine("Error in SendRolesAndParies(): " + ex.Message);
             }
             
         }
 
-        private static async void SetRole(int numberOfPlayers, List<string> partyList)
+        private static async void SetRole(int numberOfPlayers, List<string> partyListIn)
         {
             try
             {
@@ -263,23 +287,47 @@ namespace gs_bot
                 foreach (var player in players)
                 {
                     int rnd = rand.Next(0, numberOfPlayers);
-                    player.party = partyList[rnd];
-                    player.role = partyList[rnd];
-                    await botClient.SendTextMessageAsync(player.id, "Твоя партия в этой игре: " + player.party);
-                    if (player.party == "Фашист" && hAdded == false)
+                    player.Party = partyListIn[rnd];
+                    player.Role = partyListIn[rnd];
+                    await botClient.SendTextMessageAsync(player.Id, "Твоя партия в этой игре: " + player.Party);
+                    if (player.Party == "Фашист" && hAdded == false)
                     {
-                        player.role = "Гитлер";
-                        await botClient.SendTextMessageAsync(player.id, "Да ты еще и Гитлер!");
+                        player.Role = "Гитлер";
+                        await botClient.SendTextMessageAsync(player.Id, "Да ты еще и Гитлер!");
                         hAdded = true;
                     }
-                    partyList.RemoveAt(rnd);
+                    partyListIn.RemoveAt(rnd);
                     numberOfPlayers--;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                await botClient.SendTextMessageAsync(319872328, "Ошибка метода SetRole, во время распределения ролей");
+                await botClient.SendTextMessageAsync(messageWithTime.Chat.Id, "Произошла ошибка (см. лог)");
+                Console.WriteLine("Error in SetRole(): " + ex.Message);
             }           
+        }
+
+        private static string[] AddPartiesRange(int numberOfLiberals, int numberOfFascists)
+        {
+            string[] parties = new string[numberOfLiberals + numberOfFascists];
+
+            int counter = 0;
+
+            while (counter < numberOfLiberals)
+            {
+                parties[counter] = "Либерал";
+
+                counter++;
+            }
+
+            while (counter < parties.Length)
+            {
+                parties[counter] = "Фашист";
+
+                counter++;
+            }
+
+            return parties;
         }
     }
 }
